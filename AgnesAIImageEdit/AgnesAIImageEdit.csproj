@@ -14,13 +14,13 @@
     <SelfContained>true</SelfContained>
     <RuntimeIdentifier>win-x64</RuntimeIdentifier>
     <PublishReadyToRun>true</PublishReadyToRun>
-    <ApplicationIcon>..\Icons\biglogo (1)_multi.ico</ApplicationIcon>
+    <ApplicationIcon>Icons\biglogo.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="System.Security.Cryptography.ProtectedData" Version="8.0.0" />
     <PackageReference Include="System.Management" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="..\Icons\biglogo (1)_multi.ico" Link="biglogo.ico" />
+    <Content Include="Icons\biglogo.ico" />
   </ItemGroup>
 </Project>
