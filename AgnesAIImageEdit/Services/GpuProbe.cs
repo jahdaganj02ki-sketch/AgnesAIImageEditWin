@@ -38,7 +38,7 @@ namespace AgnesAIImageEdit.Services
 
             if (force || detected || lowTier)
             {
-                System.Windows.Media.RenderOptions.ProcessRenderMode = System.Windows.Media.RenderMode.SoftwareOnly;
+                System.Windows.Media.RenderOptions.ProcessRenderMode = System.Windows.Interop.RenderMode.SoftwareOnly;
             }
         }
     }
