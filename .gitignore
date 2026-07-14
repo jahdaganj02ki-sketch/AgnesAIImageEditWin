@@ -1,11 +1,16 @@
-bin/
-obj/
-publish/
-build/out/
-*.user
-.vs/
+ bin/
+ obj/
+ publish/
+ build/out/
+ *.user
+ .vs/
+ *_wpftmp.csproj
+ *.g.cs
+ *.g.i.cs
+ *.g.i.xaml
+ *.baml
 
-# Reference assets (not needed to build the app)
-APK/
-Screenshots/
-.kilo/
+ # Reference assets (not needed to build the app)
+ APK/
+ Screenshots/
+ .kilo/
