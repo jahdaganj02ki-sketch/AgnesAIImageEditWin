@@ -1,6 +1,4 @@
 #define MyAppName "Agnes AI Image Edit"
-#define MyAppVersion "1.0.0"
-#define PublishOutput "publish"
 
 #ifndef MyAppVersion
   #define MyAppVersion "0.0.0-dev"
