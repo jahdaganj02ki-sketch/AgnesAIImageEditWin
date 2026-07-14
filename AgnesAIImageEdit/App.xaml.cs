@@ -6,6 +6,8 @@ using System.Windows.Interop;
 using AgnesAIImageEdit.Models;
 using AgnesAIImageEdit.Services;
 using AgnesAIImageEdit.Views;
+using AgnesAIImageEdit.ViewModels;
+using AgnesAIImageEdit.Resources.Themes;
 
 namespace AgnesAIImageEdit
 {
@@ -34,16 +36,15 @@ namespace AgnesAIImageEdit
 
 			AppSettings.Current = AppSettings.Load();
 
-			// Fix: WPF throws "Cannot find non-neutral culture related to 'en-us'"
-			// when MainWindow load-lokalisierten Content bindet, bevor eine
-			// neutrale CurrentCulture gesetzt ist. Die CurrentCulture explizit
-			// auf die OS-Kultur setzen, bevor base.OnStartup MainWindow erstellt.
+			// Set OS culture so WPF can load de-DE resources (fixes 0x0407 crash)
 			try
 			{
-				var osCulture = System.Globalization.CultureInfo.InstalledUICulture ??
+				System.Globalization.CultureInfo.DefaultThreadCurrentCulture =
+					System.Globalization.CultureInfo.InstalledUICulture ??
 					System.Globalization.CultureInfo.CurrentUICulture;
-				System.Globalization.CultureInfo.DefaultThreadCurrentCulture = osCulture;
-				System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = osCulture;
+				System.Globalization.CultureInfo.DefaultThreadCurrentUICulture =
+					System.Globalization.CultureInfo.InstalledUICulture ??
+					System.Globalization.CultureInfo.CurrentUICulture;
 			}
 			catch { /* best-effort */ }
 
@@ -51,19 +52,27 @@ namespace AgnesAIImageEdit
 
 			base.OnStartup(e);
 
+			// Apply saved theme before MainWindow renders
+			try
+			{
+				bool dark = AppSettings.Current.IsDarkMode;
+				ThemeManager.ApplyTheme(Application.Current, dark);
+
+				// Push theme into PillButton and other base templates that may
+				// have cached DynamicResource bindings before theme swap.
+				// We do this by replacing the Style resource entry at runtime,
+				// which forces re-evaluation by key.
+				if (MainWindow?.Resources.Contains("PillButtonLight") == false && MainWindow != null)
+				{
+					MainWindow.Resources["PillButtonLight"] = MainWindow.Resources["PillButton"];
+				}
+			}
+			catch { /* non-fatal */ }
+
 			if (!KeyVault.HasKey())
 			{
 				try
 				{
-					// ── Passwortbox-Bugfix ──────────────────────────────────────
-					// 1. SettingsWindow zuerst öffnen (ShowDialog) – MainWindow bleibt
-					//    erstellt (base.OnStartup hat sie gebaut) aber NICHT sichtbar.
-					// 2. Owner auf MainWindow setzen, ABER über Win32 SetWindowLong,
-					//    damit WPF nicht "Cannot set Owner property to itself" wirft.
-					// 3. MainWindow danach ausblenden, damit nur das Settings-Fenster
-					//    sichtbar ist. Bei Close/Cancel wird die App sauber beendet.
-					// ─────────────────────────────────────────────────────────────
-
 					var settings = new SettingsWindow();
 					settings.Loaded += (_, __) =>
 					{
@@ -81,14 +90,13 @@ namespace AgnesAIImageEdit
 
 					bool? result = settings.ShowDialog();
 
-					// MainWindow ggf. zeigen, falls Settings mit OK geschlossen wurde
 					if (result == true)
 					{
 						MainWindow?.Show();
+						ApplyThemeToMainWindow();
 					}
 					else
 					{
-						// Benutzer hat Settings abgebrochen → App beenden
 						Shutdown();
 					}
 				}
@@ -102,9 +110,19 @@ namespace AgnesAIImageEdit
 					MainWindow?.Show();
 				}
 			}
+			else
+			{
+				ApplyThemeToMainWindow();
+			}
 		}
 
-		// ── Win32 Helpers für Owner-Fix ────────────────────────────────────────
+		private void ApplyThemeToMainWindow()
+		{
+			if (MainWindow?.DataContext is MainViewModel vm)
+			{
+				vm.ApplyThemeAtStartup(Application.Current);
+			}
+		}
 
 		private const int GWLP_HWNDPARENT = -8;
 

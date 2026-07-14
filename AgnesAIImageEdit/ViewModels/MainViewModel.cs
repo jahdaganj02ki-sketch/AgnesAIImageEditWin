@@ -2,270 +2,259 @@ using System;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
-using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
 using AgnesAIImageEdit.Models;
 using AgnesAIImageEdit.Services;
 using AgnesAIImageEdit.Views;
+using AgnesAIImageEdit.Resources.Themes;
 
 namespace AgnesAIImageEdit.ViewModels
 {
-    public class MainViewModel : INotifyPropertyChanged
-    {
-        public ObservableCollection<IChatItem> Messages { get; } = new();
+	public class MainViewModel : INotifyPropertyChanged
+	{
+		public ObservableCollection<IChatItem> Messages { get; } = new();
 
-        private string _currentPrompt = "";
-        public string CurrentPrompt
-        {
-            get => _currentPrompt;
-            set { _currentPrompt = value; OnProp(nameof(CurrentPrompt)); }
-        }
+		private string _currentPrompt = "";
+		public string CurrentPrompt
+		{
+			get => _currentPrompt;
+			set { _currentPrompt = value; OnProp(nameof(CurrentPrompt)); }
+		}
 
-        private System.Windows.Media.Imaging.BitmapImage? _selectedImage;
-        public System.Windows.Media.Imaging.BitmapImage? SelectedImage
-        {
-            get => _selectedImage;
-            set { _selectedImage = value; OnProp(nameof(SelectedImage)); }
-        }
+		private System.Windows.Media.Imaging.BitmapImage? _selectedImage;
+		public System.Windows.Media.Imaging.BitmapImage? SelectedImage
+		{
+			get => _selectedImage;
+			set { _selectedImage = value; OnProp(nameof(SelectedImage)); }
+		}
 
-        private string _selectedImagePath = "";
-        public string SelectedImagePath
-        {
-            get => _selectedImagePath;
-            set { _selectedImagePath = value; OnProp(nameof(SelectedImagePath)); }
-        }
+		private string _selectedImagePath = "";
+		public string SelectedImagePath
+		{
+			get => _selectedImagePath;
+			set { _selectedImagePath = value; OnProp(nameof(SelectedImagePath)); }
+		}
 
-        private string _selectedModel = AppSettings.Current.DefaultImageModel;
-        public string SelectedModel
-        {
-            get => _selectedModel;
-            set { _selectedModel = value; OnProp(nameof(SelectedModel)); }
-        }
+		private string _selectedModel = AppSettings.Current.DefaultImageModel;
+		public string SelectedModel
+		{
+			get => _selectedModel;
+			set { _selectedModel = value; OnProp(nameof(SelectedModel)); }
+		}
 
-        public string[] AvailableModels { get; } = { AppSettings.ModelImage21, AppSettings.ModelImage20 };
+		public string[] AvailableModels { get; } = { AppSettings.ModelImage21, AppSettings.ModelImage20 };
 
-        private bool _isTextToImage;
-        public bool IsTextToImage
-        {
-            get => _isTextToImage;
-            set
-            {
-                _isTextToImage = value;
-                OnProp(nameof(IsTextToImage));
-                OnProp(nameof(IsEditMode));
-                OnProp(nameof(ModeButtonLabel));
-            }
-        }
+		private bool _isTextToImage = true;
+		public bool IsTextToImage
+		{
+			get => _isTextToImage;
+			set
+			{
+				_isTextToImage = value;
+				OnProp(nameof(IsTextToImage));
+				OnProp(nameof(IsEditMode));
+				OnProp(nameof(ModeButtonLabel));
+			}
+		}
 
-        public bool IsEditMode => !IsTextToImage;
-        public string ModeButtonLabel => IsTextToImage ? "Edit Image" : "Text-to-Image";
+		public bool IsEditMode => !IsTextToImage;
+		public string ModeButtonLabel => IsTextToImage ? "Edit Image" : "Text-to-Image";
 
-        private bool _isBusy;
-        public bool IsBusy
-        {
-            get => _isBusy;
-            set { _isBusy = value; OnProp(nameof(IsBusy)); }
-        }
+		private bool _isBusy;
+		public bool IsBusy
+		{
+			get => _isBusy;
+			set { _isBusy = value; OnProp(nameof(IsBusy)); }
+		}
 
-        private string _statusText = "";
-        public string StatusText
-        {
-            get => _statusText;
-            set { _statusText = value; OnProp(nameof(StatusText)); }
-        }
+		private string _statusText = "";
+		public string StatusText
+		{
+			get => _statusText;
+			set { _statusText = value; OnProp(nameof(StatusText)); }
+		}
 
-        private bool _enhance;
-        public bool Enhance
-        {
-            get => _enhance;
-            set { _enhance = value; OnProp(nameof(Enhance)); }
-        }
+		private bool _enhance;
+		public bool Enhance
+		{
+			get => _enhance;
+			set { _enhance = value; OnProp(nameof(Enhance)); }
+		}
 
-        public RelayCommand EditImageCommand { get; }
-        public RelayCommand RemoveImageCommand { get; }
-        public RelayCommand SubmitCommand { get; }
-        public RelayCommand OpenSettingsCommand { get; }
-        public RelayCommand OpenHistoryCommand { get; }
-        public RelayCommand ToggleModeCommand { get; }
+		public string ThemeButtonLabel => AppSettings.Current.IsDarkMode ? "Light Mode" : "Dark Mode";
 
-        public MainViewModel()
-        {
-            Enhance = AppSettings.Current.EnhancePrompt;
-            SelectedModel = AppSettings.Current.DefaultImageModel;
+		public RelayCommand EditImageCommand { get; }
+		public RelayCommand RemoveImageCommand { get; }
+		public RelayCommand SubmitCommand { get; }
+		public RelayCommand OpenSettingsCommand { get; }
+		public RelayCommand OpenHistoryCommand { get; }
+		public RelayCommand ToggleModeCommand { get; }
+		public RelayCommand ToggleThemeCommand { get; }
 
-            EditImageCommand = new RelayCommand(_ => PickImage());
-            RemoveImageCommand = new RelayCommand(_ => ClearImage());
-            SubmitCommand = new RelayCommand(async _ => await SubmitAsync());
-            OpenSettingsCommand = new RelayCommand(_ => OpenSettings());
-            OpenHistoryCommand = new RelayCommand(_ => OpenHistory());
-            ToggleModeCommand = new RelayCommand(_ => IsTextToImage = !IsTextToImage);
-        }
+		public MainViewModel()
+		{
+			Enhance = AppSettings.Current.EnhancePrompt;
+			SelectedModel = AppSettings.Current.DefaultImageModel;
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-        private void OnProp(string n) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
+			EditImageCommand = new RelayCommand(_ => PickImage());
+			RemoveImageCommand = new RelayCommand(_ => ClearImage());
+			SubmitCommand = new RelayCommand(async _ => await SubmitAsync());
+			OpenSettingsCommand = new RelayCommand(_ => OpenSettings());
+			OpenHistoryCommand = new RelayCommand(_ => OpenHistory());
+			ToggleModeCommand = new RelayCommand(_ => IsTextToImage = !IsTextToImage);
+			ToggleThemeCommand = new RelayCommand(_ => ToggleTheme());
+		}
 
-        private void PickImage()
-        {
-            var dlg = new Microsoft.Win32.OpenFileDialog
-            {
-                Filter = "Images|*.png;*.jpg;*.jpeg;*.webp;*.bmp",
-                Title = "Select image to edit"
-            };
-            if (dlg.ShowDialog() == true)
-            {
-                SelectedImagePath = dlg.FileName;
-                SelectedImage = ImageHelper.LoadBitmapImage(dlg.FileName);
-            }
-        }
+		public event PropertyChangedEventHandler? PropertyChanged;
+		private void OnProp(string n) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
 
-        private void ClearImage()
-        {
-            SelectedImage = null;
-            SelectedImagePath = "";
-        }
+		private void PickImage()
+		{
+			var dlg = new Microsoft.Win32.OpenFileDialog
+			{
+				Filter = "Images|*.png;*.jpg;*.jpeg;*.webp;*.bmp",
+				Title = "Select image to edit"
+			};
+			if (dlg.ShowDialog() == true)
+			{
+				SelectedImagePath = dlg.FileName;
+				SelectedImage = ImageHelper.LoadBitmapImage(dlg.FileName);
+			}
+		}
 
-        private (string size, string? ratio) ResolveSize()
-        {
-            if (SelectedModel == AppSettings.ModelImage21)
-                return (AppSettings.Current.OutputTier, AppSettings.Current.OutputRatio);
-            return (AppSettings.Current.OutputSizeExact, null);
-        }
+		private void ClearImage()
+		{
+			SelectedImage = null;
+			SelectedImagePath = "";
+		}
 
-        private async Task SubmitAsync()
-        {
-            if (IsBusy) return;
-            IsBusy = true;
-            try
-            {
-                if (!KeyVault.HasKey())
-                {
-                    StatusText = "No API key set. Open Settings to add one.";
-                    OpenSettings();
-                    return;
-                }
+		private (string size, string? ratio) ResolveSize()
+		{
+			if (SelectedModel == AppSettings.ModelImage21)
+				return (AppSettings.Current.OutputTier, AppSettings.Current.OutputRatio);
+			return (AppSettings.Current.OutputSizeExact, null);
+		}
 
-                var prompt = CurrentPrompt.Trim();
-                if (string.IsNullOrEmpty(prompt)) return;
+		private async Task SubmitAsync()
+		{
+			if (IsBusy) return;
+			IsBusy = true;
+			try
+			{
+				if (!KeyVault.HasKey())
+				{
+					StatusText = "No API key set. Open Settings to add one.";
+					OpenSettings();
+					return;
+				}
 
-                Messages.Add(new UserPromptItem { Prompt = prompt, PreviewImage = IsTextToImage ? null : SelectedImage });
+				var prompt = CurrentPrompt.Trim();
+				if (string.IsNullOrEmpty(prompt)) return;
 
-                string finalPrompt = prompt;
+				Messages.Add(new UserPromptItem { Prompt = prompt, PreviewImage = IsTextToImage ? null : SelectedImage });
 
-                if (Enhance && !IsTextToImage)
-                {
-                    Messages.Add(new StatusItem { Text = "Enhancing prompt…" });
-                    var (enh, err) = await PromptEnhancer.EnhanceAsync(prompt);
-                    if (err == null && !string.IsNullOrWhiteSpace(enh))
-                    {
-                        finalPrompt = enh.Trim();
-                        Messages.Add(new StatusItem { Text = "Enhanced: " + finalPrompt });
-                    }
-                    else if (err != null)
-                    {
-                        Messages.Add(new StatusItem { Text = $"Enhance failed ({err}); using original prompt." });
-                    }
-                }
+				string finalPrompt = prompt;
 
-                Messages.Add(new StatusItem { Text = "Preparing model… this may take 30–60 seconds." });
+				if (Enhance && !IsTextToImage)
+				{
+					Messages.Add(new StatusItem { Text = "Enhancing prompt…" });
+					var (enh, err) = await PromptEnhancer.EnhanceAsync(prompt);
+					if (err == null && !string.IsNullOrWhiteSpace(enh))
+					{
+						finalPrompt = enh.Trim();
+						Messages.Add(new StatusItem { Text = "Enhanced: " + finalPrompt });
+					}
+					else if (err != null)
+					{
+						Messages.Add(new StatusItem { Text = $"Enhance failed ({err}); using original prompt." });
+					}
+				}
 
-                List<string>? images = null;
-                if (!IsTextToImage && !string.IsNullOrEmpty(SelectedImagePath))
-                {
-                    var dataUri = ImageHelper.FileToDataUri(SelectedImagePath, 2048);
-                    images = new List<string> { dataUri };
-                }
+				Messages.Add(new StatusItem { Text = "Preparing model… this may take 30–60 seconds." });
 
-                var (size, ratio) = ResolveSize();
-                var (bytes, revised, error) = await AgnesClient.GenerateImageAsync(SelectedModel, finalPrompt, images, size, ratio, "b64_json");
+				List<string>? images = null;
+				if (!IsTextToImage && !string.IsNullOrEmpty(SelectedImagePath))
+				{
+					var dataUri = ImageHelper.FileToDataUri(SelectedImagePath, 2048);
+					images = new List<string> { dataUri };
+				}
 
-                if (error != null)
-                {
-                    Messages.Add(new StatusItem { Text = "Error: " + error });
-                    return;
-                }
+				var (size, ratio) = ResolveSize();
+				var (bytes, revised, error) = await AgnesClient.GenerateImageAsync(SelectedModel, finalPrompt, images, size, ratio, "b64_json");
 
-                var bmp = ImageHelper.BytesToBitmap(bytes!);
-                var outDir = AppSettings.Current.ResolveSaveFolder();
-                Directory.CreateDirectory(outDir);
-                var fileName = $"agnes_{DateTime.Now:yyyyMMdd_HHmmss}.png";
-                var outPath = Path.Combine(outDir, fileName);
-                File.WriteAllBytes(outPath, bytes!);
+				if (error != null)
+				{
+					Messages.Add(new StatusItem { Text = "Error: " + error });
+					return;
+				}
 
-                Messages.Add(new ResultItem
-                {
-                    OutputImage = bmp,
-                    Prompt = finalPrompt,
-                    Model = SelectedModel,
-                    OutputPath = outPath,
-                    RevisedPrompt = revised
-                });
+				var bmp = ImageHelper.BytesToBitmap(bytes!);
+				var outDir = AppSettings.Current.ResolveSaveFolder();
+				Directory.CreateDirectory(outDir);
+				var fileName = $"agnes_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+				var outPath = Path.Combine(outDir, fileName);
+				File.WriteAllBytes(outPath, bytes!);
 
-                var hist = new HistoryItem
-                {
-                    Mode = IsTextToImage ? "text" : "edit",
-                    Model = SelectedModel,
-                    Prompt = finalPrompt,
-                    OutputPath = outPath
-                };
-                if (!IsTextToImage && !string.IsNullOrEmpty(SelectedImagePath) && File.Exists(SelectedImagePath))
-                    hist.InputThumbBase64 = ImageHelper.MakeThumbBase64(File.ReadAllBytes(SelectedImagePath));
-                HistoryStore.Add(hist);
+				Messages.Add(new ResultItem
+				{
+					OutputImage = bmp,
+					Prompt = finalPrompt,
+					Model = SelectedModel,
+					OutputPath = outPath,
+					RevisedPrompt = revised
+				});
 
-                CurrentPrompt = "";
-                ClearImage();
-            }
-            finally
-            {
-                IsBusy = false;
-            }
-        }
+				var hist = new HistoryItem
+				{
+					Mode = IsTextToImage ? "text" : "edit",
+					Model = SelectedModel,
+					Prompt = finalPrompt,
+					OutputPath = outPath
+				};
+				if (!IsTextToImage && !string.IsNullOrEmpty(SelectedImagePath) && File.Exists(SelectedImagePath))
+					hist.InputThumbBase64 = ImageHelper.MakeThumbBase64(File.ReadAllBytes(SelectedImagePath));
+				HistoryStore.Add(hist);
 
-        private void OpenSettings()
-        {
-            var w = new SettingsWindow { Owner = Application.Current.MainWindow, WindowStartupLocation = WindowStartupLocation.CenterOwner };
-            if (w.ShowDialog() == true)
-            {
-                AppSettings.Current = AppSettings.Load();
-                SelectedModel = AppSettings.Current.DefaultImageModel;
-                Enhance = AppSettings.Current.EnhancePrompt;
-            }
-        }
+				CurrentPrompt = "";
+				ClearImage();
+			}
+			finally
+			{
+				IsBusy = false;
+			}
+		}
 
-        private void OpenHistory()
-        {
-            var w = new HistoryWindow { Owner = Application.Current.MainWindow, WindowStartupLocation = WindowStartupLocation.CenterOwner };
-            w.ShowDialog();
-        }
+		private void OpenSettings()
+		{
+			var w = new SettingsWindow { Owner = Application.Current.MainWindow, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+			if (w.ShowDialog() == true)
+			{
+				AppSettings.Current = AppSettings.Load();
+				SelectedModel = AppSettings.Current.DefaultImageModel;
+				Enhance = AppSettings.Current.EnhancePrompt;
+				OnProp(nameof(ThemeButtonLabel));
+			}
+		}
 
-        // Called from ResultCard code-behind.
-        public void SaveResult(ResultItem item)
-        {
-            var dlg = new Microsoft.Win32.SaveFileDialog
-            {
-                Filter = "PNG|*.png",
-                FileName = string.IsNullOrEmpty(item.OutputPath) ? "agnes_result.png" : Path.GetFileName(item.OutputPath)
-            };
-            if (dlg.ShowDialog() == true && File.Exists(item.OutputPath))
-                File.Copy(item.OutputPath, dlg.FileName, true);
-        }
+		private void OpenHistory()
+		{
+			var w = new HistoryWindow { Owner = Application.Current.MainWindow, WindowStartupLocation = WindowStartupLocation.CenterOwner };
+			w.ShowDialog();
+		}
 
-        public void CopyResult(ResultItem item)
-        {
-            if (item.OutputImage != null)
-                Clipboard.SetImage(item.OutputImage);
-        }
+		private void ToggleTheme()
+		{
+			AppSettings.Current.IsDarkMode = !AppSettings.Current.IsDarkMode;
+			AppSettings.Current.Save();
+			ThemeManager.ApplyTheme(Application.Current, AppSettings.Current.IsDarkMode);
+			OnProp(nameof(ThemeButtonLabel));
+		}
 
-        public void ShareResult(ResultItem item)
-        {
-            if (item.OutputImage != null)
-                Clipboard.SetImage(item.OutputImage);
-            if (File.Exists(item.OutputPath))
-                System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{item.OutputPath}\"");
-        }
-
-        public void Rate(ResultItem item, int value)
-        {
-            item.Rating = item.Rating == value ? null : value;
-        }
-    }
+		public void ApplyThemeAtStartup(Application app)
+		{
+			ThemeManager.ApplyTheme(app, AppSettings.Current.IsDarkMode);
+			OnProp(nameof(ThemeButtonLabel));
+		}
+	}
 }

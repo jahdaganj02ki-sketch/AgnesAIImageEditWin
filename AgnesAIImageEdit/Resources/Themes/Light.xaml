@@ -1,0 +1,34 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- Window chrome -->
+  <SolidColorBrush x:Key="Brush.WindowBackground" Color="#FFFFFF"/>
+  <SolidColorBrush x:Key="Brush.WindowForeground" Color="#1A1A1A"/>
+
+  <!-- Surfaces -->
+  <SolidColorBrush x:Key="Brush.Surface" Color="#FFFFFF"/>
+  <SolidColorBrush x:Key="Brush.SurfaceAlt" Color="#F5F5F5"/>
+  <SolidColorBrush x:Key="Brush.SurfaceInput" Color="#FFFFFF"/>
+
+  <!-- Borders & dividers -->
+  <SolidColorBrush x:Key="Brush.Border" Color="#E0E0E0"/>
+  <SolidColorBrush x:Key="Brush.BorderSubtle" Color="#EEEEEE"/>
+
+  <!-- Text -->
+  <SolidColorBrush x:Key="Brush.TextPrimary" Color="#1A1A1A"/>
+  <SolidColorBrush x:Key="Brush.TextSecondary" Color="#666666"/>
+  <SolidColorBrush x:Key="Brush.TextHint" Color="#999999"/>
+
+  <!-- Accent -->
+  <SolidColorBrush x:Key="Brush.Accent" Color="#FF2D55"/>
+  <SolidColorBrush x:Key="Brush.AccentHover" Color="#E0264A"/>
+  <SolidColorBrush x:Key="Brush.AccentForeground" Color="#FFFFFF"/>
+
+  <!-- Chat bubbles -->
+  <SolidColorBrush x:Key="Brush.BubbleUser" Color="#EEEEEE"/>
+  <SolidColorBrush x:Key="Brush.BubbleAssistant" Color="#FFFFFF"/>
+
+  <!-- Side drawer -->
+  <SolidColorBrush x:Key="Brush.Drawer" Color="#F5F5F5"/>
+
+</ResourceDictionary>

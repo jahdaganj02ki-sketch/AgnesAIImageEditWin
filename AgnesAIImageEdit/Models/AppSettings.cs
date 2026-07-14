@@ -18,9 +18,10 @@ namespace AgnesAIImageEdit.Models
         public string OutputTier { get; set; } = "2K";            // used by agnes-image-2.1-flash
         public string OutputRatio { get; set; } = "1:1";          // used by agnes-image-2.1-flash
         public string OutputSizeExact { get; set; } = "1024x1024"; // used by agnes-image-2.0-flash
-        public string SaveFolder { get; set; } = "";               // empty => DataDir/Outputs
+  public string SaveFolder { get; set; } = ""; // empty => DataDir/Outputs
+  public bool IsDarkMode { get; set; } = false;
 
-        public static AppSettings Current { get; set; } = new AppSettings();
+  public static AppSettings Current { get; set; } = new AppSettings();
 
         private static string FilePath => Path.Combine(App.DataDir, "settings.json");
 
