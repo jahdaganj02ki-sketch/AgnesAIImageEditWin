@@ -1,0 +1,11 @@
+bin/
+obj/
+publish/
+build/out/
+*.user
+.vs/
+
+# Reference assets (not needed to build the app)
+APK/
+Screenshots/
+.kilo/
