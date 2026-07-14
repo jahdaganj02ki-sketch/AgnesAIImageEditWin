@@ -256,5 +256,36 @@ namespace AgnesAIImageEdit.ViewModels
 			ThemeManager.ApplyTheme(app, AppSettings.Current.IsDarkMode);
 			OnProp(nameof(ThemeButtonLabel));
 		}
+
+		// Called from ResultCard code-behind.
+		public void SaveResult(ResultItem item)
+		{
+			var dlg = new Microsoft.Win32.SaveFileDialog
+			{
+				Filter = "PNG|*.png",
+				FileName = string.IsNullOrEmpty(item.OutputPath) ? "agnes_result.png" : System.IO.Path.GetFileName(item.OutputPath)
+			};
+			if (dlg.ShowDialog() == true && System.IO.File.Exists(item.OutputPath))
+				System.IO.File.Copy(item.OutputPath, dlg.FileName, true);
+		}
+
+		public void CopyResult(ResultItem item)
+		{
+			if (item.OutputImage != null)
+				Clipboard.SetImage(item.OutputImage);
+		}
+
+		public void ShareResult(ResultItem item)
+		{
+			if (item.OutputImage != null)
+				Clipboard.SetImage(item.OutputImage);
+			if (System.IO.File.Exists(item.OutputPath))
+				System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{item.OutputPath}\"");
+		}
+
+		public void Rate(ResultItem item, int value)
+		{
+			item.Rating = item.Rating == value ? null : value;
+		}
 	}
 }
