@@ -1,8 +1,9 @@
 <Window x:Class="AgnesAIImageEdit.Views.SettingsWindow"
 	xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
 	xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-	Title="Settings" Height="584" Width="470" MinWidth="400" MinHeight="520"
-	Background="White" WindowStartupLocation="CenterScreen" ResizeMode="CanResizeWithGrid">
+	Title="Settings" Height="600" Width="480" MinWidth="400" MinHeight="540"
+	Background="White" WindowStartupLocation="CenterScreen" ResizeMode="CanResize"
+	SizeToContent="Manual">
 	<ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
 		<StackPanel Margin="16">
 			<TextBlock Text="Agnes AI Image Edit — Settings" FontSize="16" FontWeight="Bold" Margin="0,0,0,12"/>
