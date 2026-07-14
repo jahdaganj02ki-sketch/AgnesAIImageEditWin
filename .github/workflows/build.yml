@@ -20,7 +20,7 @@ jobs:
           dotnet-version: '8.0.x'
 
       - name: Restore
-        run: dotnet restore AgnesAIImageEdit.sln
+        run: dotnet restore AgnesAIImageEdit/AgnesAIImageEdit.csproj AgnesAIImageEdit.Tests/AgnesAIImageEdit.Tests.csproj
         shell: pwsh
 
       - name: Run tests
