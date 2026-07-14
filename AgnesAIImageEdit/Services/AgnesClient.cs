@@ -40,8 +40,24 @@ namespace AgnesAIImageEdit.Services
 
                 using var resp = await _http.SendAsync(req);
                 var raw = await resp.Content.ReadAsStringAsync();
-                if (!resp.IsSuccessStatusCode)
-                    return (null, null, $"API error {(int)resp.StatusCode}: {raw}");
+			if (!resp.IsSuccessStatusCode)
+			{
+				// Try to extract the human-readable "message" field from the
+				// API JSON error envelope so the UI never shows raw JSON.
+				string nice;
+				try
+				{
+					using var errDoc = JsonDocument.Parse(raw);
+					if (errDoc.RootElement.TryGetProperty("error", out var errObj) &&
+						errObj.TryGetProperty("message", out var msg))
+					{
+						nice = msg.GetString() ?? raw;
+					}
+					else nice = raw;
+				}
+				catch { nice = raw; }
+				return (null, null, $"API error {(int)resp.StatusCode}: {nice}");
+			}
 
                 using var doc = JsonDocument.Parse(raw);
                 var root = doc.RootElement;

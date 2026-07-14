@@ -12,17 +12,18 @@ namespace AgnesAIImageEdit.Resources.Themes
 		{
 			if (app == null) return;
 
-			// Remove existing theme dictionaries
-			for (int i = app.Resources.MergedDictionaries.Count - 1; i >= 0; i--)
+		// Remove existing theme dictionaries (use OriginalPath to avoid
+		// InvalidOperationException on relative URIs).
+		for (int i = app.Resources.MergedDictionaries.Count - 1; i >= 0; i--)
+		{
+			var md = app.Resources.MergedDictionaries[i];
+			var path = md.Source?.OriginalPath ?? "";
+			if (path.EndsWith("/Light.xaml", StringComparison.OrdinalIgnoreCase) ||
+				path.EndsWith("/Dark.xaml", StringComparison.OrdinalIgnoreCase))
 			{
-				var md = app.Resources.MergedDictionaries[i];
-				var uri = md.Source?.AbsolutePath ?? "";
-				if (uri.EndsWith("/Light.xaml", StringComparison.OrdinalIgnoreCase) ||
-					uri.EndsWith("/Dark.xaml", StringComparison.OrdinalIgnoreCase))
-				{
-					app.Resources.MergedDictionaries.RemoveAt(i);
-				}
+				app.Resources.MergedDictionaries.RemoveAt(i);
 			}
+		}
 
 			// Apply new theme
 			var dict = new ResourceDictionary
