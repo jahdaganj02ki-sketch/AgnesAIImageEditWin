@@ -24,8 +24,19 @@ namespace AgnesAIImageEdit
 
             if (!KeyVault.HasKey())
             {
-                var w = new SettingsWindow { WindowStartupLocation = WindowStartupLocation.CenterScreen };
-                w.ShowDialog();
+                try
+                {
+                    var w = new SettingsWindow { WindowStartupLocation = WindowStartupLocation.CenterScreen };
+                    w.ShowDialog();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(
+                        $"Settings window error:\n\n{ex.GetType().Name}: {ex.Message}\n\n{ex.StackTrace}",
+                        "Startup Error",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error);
+                }
             }
         }
     }
