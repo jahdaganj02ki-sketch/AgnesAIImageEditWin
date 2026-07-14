@@ -76,12 +76,10 @@
 				<StackPanel>
 					<!-- Toolbar: model selector, enhance, toggle, submit -->
 					<StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-						<ComboBox Width="160" Margin="0,0,8,0" VerticalContentAlignment="Center"
+						<ComboBox Width="160" Margin="0,0,8,0"
 								  ItemsSource="{Binding AvailableModels}"
 								  SelectedItem="{Binding SelectedModel}"
-								  Background="{DynamicResource Brush.SurfaceInput}"
-								  Foreground="{DynamicResource Brush.TextPrimary}"
-								  BorderBrush="{DynamicResource Brush.Border}"/>
+								  Style="{StaticResource ModelComboBox}"/>
 						<CheckBox Content="Enhance" IsChecked="{Binding Enhance}"
 								  VerticalAlignment="Center" Margin="0,0,8,0"
 								  Foreground="{DynamicResource Brush.TextPrimary}"/>
@@ -109,7 +107,7 @@
 					</StackPanel>
 
 					<!-- Prompt input: full width, clearly writable -->
-					<TextBox Text="{Binding CurrentPrompt, UpdateSourceTrigger=PropertyChanged}"
+					<TextBox x:Name="PromptTextBox" Text="{Binding CurrentPrompt, UpdateSourceTrigger=PropertyChanged}"
 							 AcceptsReturn="True" MinHeight="56" VerticalContentAlignment="Center"
 							 VerticalScrollBarVisibility="Auto"
 							 Background="{DynamicResource Brush.SurfaceInput}"

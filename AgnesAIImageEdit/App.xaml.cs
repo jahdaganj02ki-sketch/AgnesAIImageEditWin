@@ -124,6 +124,15 @@ namespace AgnesAIImageEdit
 			}
 		}
 
+		protected override void OnExit(ExitEventArgs e)
+		{
+			if (MainWindow?.DataContext is MainViewModel vm)
+			{
+				vm.CleanupTempFiles();
+			}
+			base.OnExit(e);
+		}
+
 		private const int GWLP_HWNDPARENT = -8;
 
 		[DllImport("user32.dll", SetLastError = true)]

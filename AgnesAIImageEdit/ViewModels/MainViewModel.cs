@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using AgnesAIImageEdit.Models;
 using AgnesAIImageEdit.Services;
 using AgnesAIImageEdit.Views;
@@ -92,6 +93,8 @@ namespace AgnesAIImageEdit.ViewModels
 		public RelayCommand ToggleModeCommand { get; }
 		public RelayCommand ToggleThemeCommand { get; }
 
+		private string? _lastTempEditFile;
+
 		public MainViewModel()
 		{
 			Enhance = AppSettings.Current.EnhancePrompt;
@@ -107,6 +110,7 @@ namespace AgnesAIImageEdit.ViewModels
 		}
 
 		public event PropertyChangedEventHandler? PropertyChanged;
+		public event Action? RequestPromptFocus;
 		private void OnProp(string n) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(n));
 
 		private void PickImage()
@@ -223,6 +227,43 @@ namespace AgnesAIImageEdit.ViewModels
 			{
 				IsBusy = false;
 			}
+		}
+
+		public void ContinueEditing(ResultItem item)
+		{
+			if (item.OutputImage == null) return;
+
+			// Save to temp file
+			var tempDir = Path.GetTempPath();
+			var tempFile = Path.Combine(tempDir, $"agnes_edit_{DateTime.Now:yyyyMMdd_HHmmss_fff}.png");
+
+			// Convert BitmapImage to PNG bytes and save
+			var encoder = new PngBitmapEncoder();
+			encoder.Frames.Add(BitmapFrame.Create(item.OutputImage));
+			using var fs = new FileStream(tempFile, FileMode.Create);
+			encoder.Save(fs);
+
+			// Clean up previous temp file
+			if (!string.IsNullOrEmpty(_lastTempEditFile) && File.Exists(_lastTempEditFile))
+				File.Delete(_lastTempEditFile);
+			_lastTempEditFile = tempFile;
+
+			// Switch to edit mode with generated image
+			SelectedImagePath = tempFile;
+			SelectedImage = ImageHelper.LoadBitmapImage(tempFile);
+			IsTextToImage = false;
+			CurrentPrompt = "";
+
+			// Request focus on prompt TextBox
+			RequestPromptFocus?.Invoke();
+
+			OnProp(nameof(IsEditMode)); // triggers UI update
+		}
+
+		public void CleanupTempFiles()
+		{
+			if (!string.IsNullOrEmpty(_lastTempEditFile) && File.Exists(_lastTempEditFile))
+				File.Delete(_lastTempEditFile);
 		}
 
 		private void OpenSettings()

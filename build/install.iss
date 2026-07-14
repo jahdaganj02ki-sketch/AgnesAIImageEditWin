@@ -23,6 +23,8 @@ PrivilegesRequired=lowest
 ArchitecturesInstallIn64BitMode=x64
 UninstallDisplayName={#MyAppName}
 SetupLogging=yes
+SetupIconFile=..\Icons\biglogo (1)_multi.ico
+UninstallIconFile=..\Icons\biglogo (1)_multi.ico
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

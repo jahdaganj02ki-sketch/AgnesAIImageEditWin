@@ -19,6 +19,14 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Restore
+        run: dotnet restore AgnesAIImageEdit.sln
+        shell: pwsh
+
+      - name: Run tests
+        run: dotnet test AgnesAIImageEdit.Tests/AgnesAIImageEdit.Tests.csproj -c Release --no-build
+        shell: pwsh
+
       - name: Publish (self-contained, single-file)
         run: |
           dotnet publish AgnesAIImageEdit/AgnesAIImageEdit.csproj `

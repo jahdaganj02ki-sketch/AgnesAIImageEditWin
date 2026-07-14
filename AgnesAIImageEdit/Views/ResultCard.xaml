@@ -14,6 +14,8 @@
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Content="&#128077;" Width="36" Height="32" Margin="2" Click="Up_Click" ToolTip="Like"/>
             <Button Content="&#128078;" Width="36" Height="32" Margin="2" Click="Down_Click" ToolTip="Dislike"/>
+            <Button Content="&#x27F3;" Width="36" Height="32" Margin="2" Click="ContinueEdit_Click" ToolTip="Continue Editing"/>
+            <Button Content="&#x26F6;" Width="36" Height="32" Margin="2" Click="FullScreen_Click" ToolTip="Full Screen"/>
             <Button Content="Copy" Width="60" Height="32" Margin="2" Click="Copy_Click"/>
             <Button Content="Share" Width="60" Height="32" Margin="2" Click="Share_Click"/>
             <Button Content="Save" Width="60" Height="32" Margin="2" Click="Save_Click"/>

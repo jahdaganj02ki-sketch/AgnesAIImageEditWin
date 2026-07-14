@@ -9,6 +9,10 @@ namespace AgnesAIImageEdit.Views
         {
             InitializeComponent();
             DataContext = new MainViewModel();
+            if (DataContext is MainViewModel vm)
+            {
+                vm.RequestPromptFocus += () => PromptTextBox.Focus();
+            }
         }
 
         private void Hamburger_Click(object sender, RoutedEventArgs e)

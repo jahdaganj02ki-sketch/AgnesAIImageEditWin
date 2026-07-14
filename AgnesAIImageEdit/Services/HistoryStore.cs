@@ -10,15 +10,17 @@ namespace AgnesAIImageEdit.Services
     public static class HistoryStore
     {
         private static string FilePath => Path.Combine(App.DataDir, "history.json");
+        private static string? _testFilePath;
         private const int MaxItems = 50;
 
         public static List<HistoryItem> Load()
         {
             try
             {
-                if (File.Exists(FilePath))
+                var path = _testFilePath ?? FilePath;
+                if (File.Exists(path))
                 {
-                    var json = File.ReadAllText(FilePath);
+                    var json = File.ReadAllText(path);
                     var list = JsonSerializer.Deserialize<List<HistoryItem>>(json);
                     if (list != null) return list;
                 }
@@ -31,8 +33,9 @@ namespace AgnesAIImageEdit.Services
         {
             try
             {
+                var path = _testFilePath ?? FilePath;
                 var json = JsonSerializer.Serialize(items, new JsonSerializerOptions { WriteIndented = true });
-                File.WriteAllText(FilePath, json);
+                File.WriteAllText(path, json);
             }
             catch { }
         }
@@ -44,5 +47,8 @@ namespace AgnesAIImageEdit.Services
             while (items.Count > MaxItems) items.RemoveAt(0);
             Save(items);
         }
+
+        public static void SetTestFile(string path) => _testFilePath = path;
+        public static void ResetTestFile() => _testFilePath = null;
     }
 }
