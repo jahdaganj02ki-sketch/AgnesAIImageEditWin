@@ -33,6 +33,20 @@ namespace AgnesAIImageEdit
 			Directory.CreateDirectory(Path.Combine(DataDir, "Outputs"));
 
 			AppSettings.Current = AppSettings.Load();
+
+			// Fix: WPF throws "Cannot find non-neutral culture related to 'en-us'"
+			// when MainWindow load-lokalisierten Content bindet, bevor eine
+			// neutrale CurrentCulture gesetzt ist. Die CurrentCulture explizit
+			// auf die OS-Kultur setzen, bevor base.OnStartup MainWindow erstellt.
+			try
+			{
+				var osCulture = System.Globalization.CultureInfo.InstalledUICulture ??
+					System.Globalization.CultureInfo.CurrentUICulture;
+				System.Globalization.CultureInfo.DefaultThreadCurrentCulture = osCulture;
+				System.Globalization.CultureInfo.DefaultThreadCurrentUICulture = osCulture;
+			}
+			catch { /* best-effort */ }
+
 			GpuProbe.ApplyRenderingMode();
 
 			base.OnStartup(e);
@@ -41,17 +55,42 @@ namespace AgnesAIImageEdit
 			{
 				try
 				{
-					// Show MainWindow first (hidden) so the native HWND exists.
-					// WPF PasswordBox crashes silently when the modal dialog has
-					// no Owner HWND because it cannot process input internally.
-					MainWindow?.Show();
+					// ── Passwortbox-Bugfix ──────────────────────────────────────
+					// 1. SettingsWindow zuerst öffnen (ShowDialog) – MainWindow bleibt
+					//    erstellt (base.OnStartup hat sie gebaut) aber NICHT sichtbar.
+					// 2. Owner auf MainWindow setzen, ABER über Win32 SetWindowLong,
+					//    damit WPF nicht "Cannot set Owner property to itself" wirft.
+					// 3. MainWindow danach ausblenden, damit nur das Settings-Fenster
+					//    sichtbar ist. Bei Close/Cancel wird die App sauber beendet.
+					// ─────────────────────────────────────────────────────────────
 
-					var w = new SettingsWindow
+					var settings = new SettingsWindow();
+					settings.Loaded += (_, __) =>
 					{
-						Owner = MainWindow,
-						WindowStartupLocation = WindowStartupLocation.CenterOwner
+						try
+						{
+							var helper = new WindowInteropHelper(settings);
+							var mainHwnd = new WindowInteropHelper(MainWindow).Handle;
+							if (mainHwnd != IntPtr.Zero && helper.Handle != mainHwnd)
+							{
+								SetWindowLong(helper.Handle, GWLP_HWNDPARENT, mainHwnd);
+							}
+						}
+						catch { /* Win32-Owner-Set best-effort */ }
 					};
-					w.ShowDialog();
+
+					bool? result = settings.ShowDialog();
+
+					// MainWindow ggf. zeigen, falls Settings mit OK geschlossen wurde
+					if (result == true)
+					{
+						MainWindow?.Show();
+					}
+					else
+					{
+						// Benutzer hat Settings abgebrochen → App beenden
+						Shutdown();
+					}
 				}
 				catch (Exception ex)
 				{
@@ -60,8 +99,16 @@ namespace AgnesAIImageEdit
 						"Startup Error",
 						MessageBoxButton.OK,
 						MessageBoxImage.Error);
+					MainWindow?.Show();
 				}
 			}
 		}
+
+		// ── Win32 Helpers für Owner-Fix ────────────────────────────────────────
+
+		private const int GWLP_HWNDPARENT = -8;
+
+		[DllImport("user32.dll", SetLastError = true)]
+		private static extern IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 	}
 }
