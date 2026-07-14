@@ -36,7 +36,7 @@ jobs:
           if (-not (Test-Path $iscc)) { throw "ISCC.exe not found at $iscc" }
           & $iscc "build/install.iss" `
             /dMyAppVersion=${{ github.ref_type == 'tag' && github.ref_name || '0.0.0-dev' }} `
-            /dPublishOutput=..\publish
+            /dPublishOutput=${{ github.workspace }}\publish
         shell: pwsh
 
       - name: Upload installer artifact
