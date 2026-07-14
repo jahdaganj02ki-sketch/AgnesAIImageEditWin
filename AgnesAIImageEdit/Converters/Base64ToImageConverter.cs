@@ -14,7 +14,7 @@ namespace AgnesAIImageEdit.Converters
             {
                 try
                 {
-                    var bytes = Convert.FromBase64String(s);
+                    var bytes = System.Convert.FromBase64String(s);
                     var bmp = new BitmapImage();
                     using var ms = new MemoryStream(bytes);
                     bmp.BeginInit();

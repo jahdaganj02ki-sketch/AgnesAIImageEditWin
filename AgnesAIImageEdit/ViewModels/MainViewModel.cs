@@ -87,10 +87,6 @@ namespace AgnesAIImageEdit.ViewModels
         public RelayCommand OpenSettingsCommand { get; }
         public RelayCommand OpenHistoryCommand { get; }
         public RelayCommand ToggleModeCommand { get; }
-        public RelayCommand SaveResultCommand { get; }
-        public RelayCommand CopyResultCommand { get; }
-        public RelayCommand ShareResultCommand { get; }
-        public RelayCommand RateCommand { get; }
 
         public MainViewModel()
         {
