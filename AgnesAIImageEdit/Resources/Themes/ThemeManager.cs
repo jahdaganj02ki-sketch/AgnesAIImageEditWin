@@ -5,31 +5,24 @@ namespace AgnesAIImageEdit.Resources.Themes
 {
 	public static class ThemeManager
 	{
-		private const string LightDict = "/Resources/Themes/Light.xaml";
-		private const string DarkDict = "/Resources/Themes/Dark.xaml";
+		private const string ApplicationRoot = "pack://application:,,,/";
+
+		private static readonly Uri LightUri = new Uri(ApplicationRoot + "Resources/Themes/Light.xaml", UriKind.Absolute);
+		private static readonly Uri DarkUri  = new Uri(ApplicationRoot + "Resources/Themes/Dark.xaml", UriKind.Absolute);
 
 		public static void ApplyTheme(Application app, bool isDark)
 		{
 			if (app == null) return;
 
-		// Remove existing theme dictionaries (use OriginalPath to avoid
-		// InvalidOperationException on relative URIs).
-		for (int i = app.Resources.MergedDictionaries.Count - 1; i >= 0; i--)
-		{
-			var md = app.Resources.MergedDictionaries[i];
-			var path = md.Source?.OriginalPath ?? "";
-			if (path.EndsWith("/Light.xaml", StringComparison.OrdinalIgnoreCase) ||
-				path.EndsWith("/Dark.xaml", StringComparison.OrdinalIgnoreCase))
+			// Remove existing theme dictionaries by matching the known absolute URI.
+			for (int i = app.Resources.MergedDictionaries.Count - 1; i >= 0; i--)
 			{
-				app.Resources.MergedDictionaries.RemoveAt(i);
+				var md = app.Resources.MergedDictionaries[i];
+				if (md.Source == LightUri || md.Source == DarkUri)
+					app.Resources.MergedDictionaries.RemoveAt(i);
 			}
-		}
 
-			// Apply new theme
-			var dict = new ResourceDictionary
-			{
-				Source = new Uri(isDark ? DarkDict : LightDict, UriKind.Relative)
-			};
+			var dict = new ResourceDictionary { Source = isDark ? DarkUri : LightUri };
 			app.Resources.MergedDictionaries.Add(dict);
 		}
 	}
